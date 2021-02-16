@@ -1,3 +1,5 @@
+# CONTROL File to manage the Patching
+#
 # Here are variables related to the Weblogic Environment
 
 oracle_user: website
@@ -6,7 +8,7 @@ oracle_version: 12130
 patch_name: OCT2020
 patch_name_rollback: JUL2020
 
-# WL information
+# WLS Home Details for various WLS Versions
 wl_vars:
   12130:
     oracleBase: /x
@@ -22,7 +24,7 @@ wl_vars:
 #    nmPort: 7666
 #    domainHome: /x/gops/oracle/config/aserver
 
-# PSU information
+# PSU Patch Details need to be apply or rollback to for specific WLS Version.
 quarterly_patches:
   12130:
     OCT2020:
@@ -43,6 +45,8 @@ quarterly_patches:
 #      filename: p28710939_122130_Generic.zip
 #      patchid: 28710939
 
+
+# OneOff Patch or Overlay Patch details for each WLS versions
 oneoff_patches:
   12130:
     - patchid: 32097177
@@ -55,7 +59,7 @@ oneoff_patches:
       filename: p20741228_121300_Generic.zip
 
 
-##APP INFO
+## Application Domain Details. This is only needed in case you want to implement Start/Stops of AS, MS or NM.
 app:
   CS:
     domain_name: frontoffice
@@ -81,6 +85,7 @@ app:
     domain_name: wlgenesys
     admin_listen_port: 17102
 
+##  Another important Variable created with above details
 oracle_base: "{{wl_vars[oracle_version].oracleBase}}"
 oracle_home: "{{wl_vars[oracle_version].oracleHome}}"
 domain_home: "{{wl_vars[oracle_version].domainHome}}"
@@ -94,10 +99,6 @@ env:
   ORACLE_HOME: "{{ oracle_home }}"
   ORACLE_BASE: "{{ oracle_base }}"
   PATH: "{{ oracle_home }}/OPatch:$PATH:/bin:/usr/bin"
-  LANG: en_US.UTF-8
-  LC_CTYPE: en_US.UTF-8
-  LC_ALL: en_US.UTF-8
-  INPUTRC: /etc/inputrc
 
 tmp_size_gb: 1
 var_tmp_size_gb: 1
