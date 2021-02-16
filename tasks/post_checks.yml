@@ -1,0 +1,9 @@
+---
+
+- name: List Current Patch[s]
+  shell: opatch lspatches | grep ';'| cut -d';' -f1
+  environment: "{{ env }}"
+  register: applied_patches
+
+- debug: 
+    var: applied_patches.stdout_lines

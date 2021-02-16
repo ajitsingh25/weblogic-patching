@@ -1,0 +1,44 @@
+---
+
+- debug: var=wl_home
+  tags: debug
+
+- set_fact:
+    start_nm_command: "nohup {{ wl_home }}/server/bin/startNodeManager.sh &"
+
+- debug: var=start_nm_command
+  tags: debug
+
+- name: Check if NM port is listening
+  wait_for:
+    host: "{{ansible_hostname}}"
+    port: "{{ nm_listen_port }}"
+    delay: 0
+    timeout: 3
+  register: port_check
+  ignore_errors: yes
+
+- debug: var=port_check
+  tags: debug
+
+- debug: 
+    var: env
+  tags: debug
+
+- name: start NM
+  shell: "{{start_nm_command}}" 
+  when: (port_check.failed is defined and port_check.failed|upper == "TRUE") or (port_check.state is defined and port_check.state|upper != "STARTED")
+  environment: "{{ proxy_env }}"
+  register: nm_result
+
+- debug: var=nm_result
+  tags: debug
+
+- debug:
+    var: proxy_env
+  tags: debug
+
+- wait_for:
+    host: "{{ansible_hostname}}"
+    port: "{{nm_listen_port}}"
+    timeout: 90

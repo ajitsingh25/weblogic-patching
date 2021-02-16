@@ -1,0 +1,27 @@
+- hosts: all
+  gather_facts: false
+  become: true
+  become_user: "{{oracle_user}}"
+
+  tasks:
+
+  - name: Execute Java showSettings Command
+    shell: /x/bea-wl1213/jdk/bin/java -XshowSettings -version 2>&1 > /dev/null | grep -i "encoding"
+    register: showSettings
+
+  - name: Execute Locale Command
+    command: locale 
+    register: Locale
+
+  - name: Execute env Command
+    shell: env | grep -i utf
+    register: menv
+
+  - debug:
+      var: showSettings.stdout_lines
+
+  - debug:
+      var: Locale.stdout_lines
+
+  - debug:
+      var: menv.stdout_lines

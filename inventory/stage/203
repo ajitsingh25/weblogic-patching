@@ -1,0 +1,5 @@
+[all]
+stage2cpp203
+
+[all:vars]
+ansible_python_interpreter=/x/opt/pp/bin/python

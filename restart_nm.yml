@@ -1,0 +1,34 @@
+- hosts: all
+
+  vars:
+    proxy_env:
+      LANG: en_US.UTF-8
+      LC_CTYPE: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      INPUTRC: /etc/inputrc
+
+  tasks:
+
+  - stat:
+      path: "{{oracle_home}}"
+    become: true
+    become_user: "{{oracle_user}}"
+    register: oracle_home_stat_result
+
+  - debug:
+      var: oracle_home_stat_result.stat.exists
+    tags: debug
+
+  - set_fact:
+      PROCESS: "weblogic.NodeManager"
+
+  - set_fact:
+      today: "{{ lookup('pipe', 'date +%m-%d-%y-%H:%M:%S') }}"
+
+  - name: Stop Node Manager Task
+    include: tasks/stop_nm.yml
+    when: oracle_home_stat_result.stat.exists
+
+  - name: Start Node Manager Task
+    include: tasks/start_nm.yml
+    when: oracle_home_stat_result.stat.exists

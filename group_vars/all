@@ -1,0 +1,106 @@
+# Here are variables related to the Weblogic Environment
+
+oracle_user: website
+oracle_group: website
+oracle_version: 12130
+patch_name: OCT2020
+patch_name_rollback: JUL2020
+
+# WL information
+wl_vars:
+  12130:
+    oracleBase: /x
+    oracleHome: /x/bea-wl1213
+    wlHome: /x/bea-wl1213/wlserver
+    nmPort: 6666
+    domainHome: /x/bea-wl1213/user_projects/domains
+
+#  12210:
+#    oracleBase: /x/gops/oracle
+#    oracleHome: /x/gops/oracle/product/wl12212
+#    wlHome: /x/gops/oracle/product/wl12212/wlserver
+#    nmPort: 7666
+#    domainHome: /x/gops/oracle/config/aserver
+
+# PSU information
+quarterly_patches:
+  12130:
+    OCT2020:
+      filename: p31656851_121300_Generic.zip
+      patchid: 31656851
+
+    JUL2020:
+      filename: p31178516_121300_Generic.zip
+      patchid: 31178516
+
+#  12210:
+#    JUL2018:
+#      filename: p27741413_122120_Generic.zip
+#      patchid: 27741413
+
+#  12213:
+#    JAN2019:
+#      filename: p28710939_122130_Generic.zip
+#      patchid: 28710939
+
+oneoff_patches:
+  12130:
+    - patchid: 32097177
+      filename: p32097177_12130201020_Generic.zip
+
+#    - patchid: 23636560
+#      filename: p23636560_121300_Generic.zip
+ 
+    - patchid: 20741228
+      filename: p20741228_121300_Generic.zip
+
+
+##APP INFO
+app:
+  CS:
+    domain_name: frontoffice
+    serv: pegacspserv
+    admin_listen_port: 11102
+
+  GOLD:
+    domain_name: backoffice
+    serv: pegacspserv-disputes
+    admin_listen_port: 13102
+
+  GEMS:
+    domain_name: gems
+    serv: gemsserv
+    admin_listen_port: 15102
+
+  SMC:
+    domain_name: smc
+    serv: smcserv
+    admin_listen_port: 14102
+
+  WLGENESYS:
+    domain_name: wlgenesys
+    admin_listen_port: 17102
+
+oracle_base: "{{wl_vars[oracle_version].oracleBase}}"
+oracle_home: "{{wl_vars[oracle_version].oracleHome}}"
+domain_home: "{{wl_vars[oracle_version].domainHome}}"
+domain_name: "{{ app[app_name].domain_name }}"
+mserver_home: "{{wl_vars[oracle_version].mserverHome}}"
+wl_home: "{{wl_vars[oracle_version].wlHome}}"
+nm_listen_port: "{{wl_vars[oracle_version].nmPort}}"
+syshiera: /etc/syshiera.yaml
+
+env:
+  ORACLE_HOME: "{{ oracle_home }}"
+  ORACLE_BASE: "{{ oracle_base }}"
+  PATH: "{{ oracle_home }}/OPatch:$PATH:/bin:/usr/bin"
+  LANG: en_US.UTF-8
+  LC_CTYPE: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+  INPUTRC: /etc/inputrc
+
+tmp_size_gb: 1
+var_tmp_size_gb: 1
+oracle_stage_install: /var/tmp/patch
+oracle_stage_base: "{{playbook_dir}}/patches"
+patch_directory: "{{ oracle_stage_install }}/{{ oracle_version }}/{{ patch_name }}"

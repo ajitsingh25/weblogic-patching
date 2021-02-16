@@ -1,0 +1,8 @@
+- hosts: all
+  gather_facts: false
+
+  tasks:
+
+  - name: Applied Patch[s] Output
+    include: tasks/post_checks.yml
+    tags: list_patch

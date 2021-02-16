@@ -1,0 +1,6 @@
+---
+# tasks file for cleanup
+- name: Clean patch Stage Directories
+  file:
+    state: absent
+    path: "{{ oracle_stage_install }}"

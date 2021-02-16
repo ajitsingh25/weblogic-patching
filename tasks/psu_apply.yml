@@ -1,0 +1,19 @@
+---
+#Apply PSU patches
+- name: Template patch list
+  template:
+    src: quarterly_patch_list.j2
+    dest: "{{ oracle_stage_install }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: Apply PSU patches
+  shell: opatch napply -force -silent -skip_subset -skip_duplicate -phBaseFile {{ oracle_stage_install }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt
+  environment: "{{ env }}"
+  register: apply_psu
+  async: 1200 
+  poll: 60
+
+- debug: 
+    msg: "{{ apply_psu.rc }}"
+  tags: debug

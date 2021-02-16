@@ -1,0 +1,86 @@
+- hosts: all
+  become: true
+  become_user: "{{oracle_user}}"
+  gather_facts: false
+
+  tasks:
+
+  - stat:
+      path: "{{oracle_home}}"
+    register: ohCheck
+
+  - set_fact:
+      rollback_psu: "true"
+
+  - debug:
+      var: rollback_psu
+    when: rollback_psu
+    tags: debug
+
+  - name: Rollback One-Off Patch
+    include: tasks/oneoff_rollback.yml
+    when: oneoff_patches[oracle_version] is defined
+
+  - name: Check PSU patches if already applied for the Rollback
+    shell: opatch lspatches | grep ';'| cut -d';' -f1 | grep {{ quarterly_patches[oracle_version][patch_name].patchid }}
+    environment: "{{ env }}"
+    register: psuappliedpatchr
+    when:  quarterly_patches[oracle_version] is defined
+    ignore_errors: yes
+    async: 900
+    poll: 30
+
+  - debug:
+      var: psuappliedpatchr.stdout
+    tags: debug
+
+  - name: Rollback Current PSU Patch
+    include: tasks/psu_rollback_1.yml
+    when: psuappliedpatchr.stdout|string != "" and quarterly_patches[oracle_version] is defined
+  
+  - set_fact:
+      patch_name: "{{ patch_name_rollback }}"
+
+  - name: Check if Oracle_Home Exists
+    fail: 
+      msg: Message {{oracle_home}} doesn't exits on {{ansible_hostname}}.
+    when: not ohCheck.stat.exists
+  
+  - debug: 
+      msg: "{{ patch_name }}"
+    tags: debug
+  
+  - name: Run pre-check tasks
+    include: tasks/pre_checks.yml
+    tags: pre_checks
+    when: quarterly_patches[oracle_version] is defined or oneoff_patches[oracle_version] is defined 
+
+  - name: Check PSU patches if already applied
+    shell: opatch lspatches | grep ';'| cut -d';' -f1 | grep {{ quarterly_patches[oracle_version][patch_name_rollback].patchid }}
+    environment: "{{ env }}"
+    register: psuappliedpatch
+    when: (quarterly_patches[oracle_version]) is defined
+    ignore_errors: yes
+    async: 900
+    poll: 30
+  
+  - debug: 
+      var: psuappliedpatch
+    tags: debug
+  
+  - name: Extract PSU and One-off patches
+    include: tasks/extract_files.yml
+    tags: extract_files
+    when: quarterly_patches[oracle_version] is defined or oneoff_patches[oracle_version] is defined
+
+  - name: Apply Previous PSU Patch
+    include: tasks/psu_rollback.yml
+    when: psuappliedpatch.stdout|string == "" and quarterly_patches[oracle_version] is defined
+  
+  - name: Applied Patch[s] Output
+    include: tasks/post_checks.yml
+    tags: list_patch
+  
+  - name: Cleanup the patch zips
+    include: tasks/cleanup.yml
+    tags: always

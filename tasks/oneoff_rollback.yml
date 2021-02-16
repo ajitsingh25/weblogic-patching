@@ -1,0 +1,11 @@
+---
+- name: Rollback Specific One-off Patches
+  shell: "{{ oracle_home }}/OPatch/opatch rollback -silent -local -id {{ item.patchid }}"
+  with_items: "{{ oneoff_patches[oracle_version]|default([]) }}"
+  when: oneoff_patches[oracle_version] is defined
+  register: oneoffrollback
+  ignore_errors: true
+
+- debug: 
+    msg: "{{ oneoffrollback }}"
+  tags: debug
